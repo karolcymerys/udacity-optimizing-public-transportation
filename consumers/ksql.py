@@ -19,13 +19,13 @@ CREATE TABLE turnstile (
     station_name    STRING,
     line            STRING
 ) WITH (
-    kafka_topic = 'com.chicago.cta.turnstiles.v1',
-    value_format = 'avro',
-    key = 'station_id'
+    kafka_topic='com.chicago.cta.turnstiles.v1',
+    value_format='avro',
+    key='station_id'
 );
 
-CREATE TABLE turnstile_summary
-    WITH (value_format = 'json') AS
+CREATE TABLE TURNSTILE_SUMMARY
+    WITH (value_format='json') AS
         SELECT station_id AS station_id,
                COUNT(*)   AS count
             FROM turnstile
@@ -35,7 +35,7 @@ CREATE TABLE turnstile_summary
 
 def execute_statement():
     """Executes the KSQL statement against the KSQL API"""
-    if topic_check.topic_exists("turnstile_summary") is True:
+    if topic_check.topic_exists('TURNSTILE_SUMMARY') is True:
         return
 
     logging.debug("executing ksql statement...")

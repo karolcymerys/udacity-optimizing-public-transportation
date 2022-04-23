@@ -8,7 +8,7 @@ from confluent_kafka.avro import AvroProducer
 
 logger = logging.getLogger(__name__)
 
-BROKER_URL = "PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094"
+BROKER_URL = "PLAINTEXT://localhost:9092"
 SCHEMA_REGISTRY_URL = "http://localhost:8081"
 
 
@@ -53,7 +53,7 @@ class Producer:
             'bootstrap.servers': self.broker_properties['bootstrap.servers']
         })
 
-        if admin_client.list_topics(topic=self.topic_name).topics.get(self.topic_name):
+        if admin_client.list_topics().topics.get(self.topic_name):
             logger.info("Topic already exists - skipping")
         else:
             admin_client.create_topics(new_topics=[

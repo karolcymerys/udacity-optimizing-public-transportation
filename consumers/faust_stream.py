@@ -49,9 +49,9 @@ class TransformedStation(faust.Record):
 
 
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
-topic = app.topic("com.chicago.cta.stations.v1", value_type=Station)
+topic = app.topic("com.chicago.cta.stations", value_type=Station, partitions=1)
 
-out_topic = app.topic("com.chicago.cta.transformed_stations.v1", partitions=1)
+out_topic = app.topic("com.chicago.cta.stations.table.v1", partitions=1)
 
 table = app.Table(
     name='com.chicago.cta.stations.table.v1',
@@ -63,7 +63,7 @@ table = app.Table(
 
 @app.agent(topic)
 async def process_events(events):
-    async for event in events.group_by(Station.station_id):
+    async for event in events:
         transformed_station = TransformedStation.from_station(event)
         if transformed_station:
             table[transformed_station.station_id] = transformed_station

@@ -10,8 +10,8 @@ from models.turnstile_hardware import TurnstileHardware
 
 logger = logging.getLogger(__name__)
 
-TOPIC_PARTITIONS = 2
-TOPIC_REPLICAS = 2
+TOPIC_PARTITIONS = 1
+TOPIC_REPLICAS = 1
 
 
 class Turnstile(Producer):
@@ -32,13 +32,13 @@ class Turnstile(Producer):
 
     def run(self, timestamp, time_step):
         """Simulates riders entering through the turnstile."""
-        num_entries = self.turnstile_hardware.get_entries(timestamp, time_step)
+        self.turnstile_hardware.get_entries(timestamp, time_step)
         self.producer.produce(
             topic=self.topic_name,
             key={"timestamp": self.time_millis()},
             value={
-                'station_id': self.station.id,
+                'station_id': self.station.station_id,
                 'station_name': self.station.name,
                 'line': self.station.color.name,
-            },
+            }
         )

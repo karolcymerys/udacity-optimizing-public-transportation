@@ -19,7 +19,7 @@ class Lines:
 
     def process_message(self, message):
         """Processes a station message"""
-        if "org.chicago.cta.station" in message.topic():
+        if "com.chicago.cta.station" in message.topic():
             value = message.value()
             if message.topic() == "com.chicago.cta.stations.table.v1":
                 value = json.loads(value)

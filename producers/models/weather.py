@@ -11,6 +11,9 @@ from models.producer import Producer
 
 logger = logging.getLogger(__name__)
 
+TOPIC_PARTITIONS = 1
+TOPIC_REPLICAS = 1
+
 
 class Weather(Producer):
     """Defines a simulated weather model"""
@@ -33,6 +36,8 @@ class Weather(Producer):
             topic_name=self.topic_name,
             key_schema=Weather.key_schema,
             value_schema=Weather.value_schema,
+            num_partitions=TOPIC_PARTITIONS,
+            num_replicas=TOPIC_REPLICAS
         )
 
         self.status = Weather.status.sunny
@@ -77,7 +82,7 @@ class Weather(Producer):
                     },
                     'value': {
                         'temperature': self.temp,
-                        'status': self.status
+                        'status': self.status.name
                     }
                 }]
             }),

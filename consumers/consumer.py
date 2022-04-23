@@ -1,5 +1,6 @@
 """Defines core consumer functionality"""
 import logging
+import uuid
 
 import confluent_kafka
 from confluent_kafka import Consumer
@@ -10,7 +11,7 @@ from tornado import gen
 
 logger = logging.getLogger(__name__)
 
-BROKER_URL = "PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094"
+BROKER_URL = "PLAINTEXT://localhost:9092"
 SCHEMA_REGISTRY_URL = "http://localhost:8081"
 
 
@@ -35,13 +36,15 @@ class KafkaConsumer:
 
         self.broker_properties = {
             'bootstrap.servers': BROKER_URL,
+            'group.id': str(uuid.uuid4()),
+            'default.topic.config': {'auto.offset.reset': 'earliest'}
         }
 
         if is_avro is True:
             self.broker_properties["schema.registry.url"] = SCHEMA_REGISTRY_URL
             self.consumer = AvroConsumer(config=self.broker_properties)
         else:
-            self.consumer = Consumer(config=self.broker_properties)
+            self.consumer = Consumer(**self.broker_properties)
             pass
 
         self.consumer.subscribe([self.topic_name_pattern], on_assign=self.on_assign)
@@ -70,7 +73,7 @@ class KafkaConsumer:
             if not msg:
                 logger.debug('No messages received')
                 return 0
-            elif not msg.error():
+            elif msg.error():
                 logger.error(f'Error has occurred while pooling topic: {msg.error()}')
             else:
                 self.message_handler(msg)
