@@ -1,5 +1,6 @@
 """Defines trends calculations for stations"""
 import logging
+from dataclasses import dataclass
 
 import faust
 
@@ -7,7 +8,7 @@ import faust
 logger = logging.getLogger(__name__)
 
 
-# Faust will ingest records from Kafka in this format
+@dataclass
 class Station(faust.Record):
     stop_id: int
     direction_id: str
@@ -21,37 +22,51 @@ class Station(faust.Record):
     green: bool
 
 
-# Faust will produce records to Kafka in this format
+@dataclass
 class TransformedStation(faust.Record):
     station_id: int
     station_name: str
     order: int
     line: str
 
+    @staticmethod
+    def from_station(station: Station):
+        if station.red:
+            line = 'red'
+        elif station.blue:
+            line = 'blue'
+        elif station.green:
+            line = 'green'
+        else:
+            return
 
-# TODO: Define a Faust Stream that ingests data from the Kafka Connect stations topic and
-#   places it into a new topic with only the necessary information.
+        return TransformedStation(
+            station_id=station.station_id,
+            station_name=station.station_name,
+            order=station.order,
+            line=line
+        )
+
+
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
-# TODO: Define the input Kafka Topic. Hint: What topic did Kafka Connect output to?
-# topic = app.topic("TODO", value_type=Station)
-# TODO: Define the output Kafka Topic
-# out_topic = app.topic("TODO", partitions=1)
-# TODO: Define a Faust Table
-#table = app.Table(
-#    # "TODO",
-#    # default=TODO,
-#    partitions=1,
-#    changelog_topic=out_topic,
-#)
+topic = app.topic("com.chicago.cta.stations", value_type=Station)
+
+out_topic = app.topic("com.chicago.cta.transformed_stations.", partitions=1)
+
+table = app.Table(
+    name='com.chicago.cta.stations.table',
+    default=TransformedStation,
+    partitions=1,
+    changelog_topic=out_topic,
+)
 
 
-#
-#
-# TODO: Using Faust, transform input `Station` records into `TransformedStation` records. Note that
-# "line" is the color of the station. So if the `Station` record has the field `red` set to true,
-# then you would set the `line` of the `TransformedStation` record to the string `"red"`
-#
-#
+@app.agent(topic)
+async def process_events(events):
+    async for event in events.group_by(Station.station_id):
+        transformed_station = TransformedStation.from_station(event)
+        if transformed_station:
+            table[transformed_station.station_id] = transformed_station
 
 
 if __name__ == "__main__":
