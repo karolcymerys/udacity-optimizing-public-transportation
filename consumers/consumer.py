@@ -36,8 +36,7 @@ class KafkaConsumer:
 
         self.broker_properties = {
             'bootstrap.servers': BROKER_URL,
-            'group.id': str(uuid.uuid4()),
-            'default.topic.config': {'auto.offset.reset': 'earliest'}
+            'group.id': str(uuid.uuid4())
         }
 
         if is_avro is True:
