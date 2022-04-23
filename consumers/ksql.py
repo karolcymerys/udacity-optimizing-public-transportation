@@ -19,7 +19,7 @@ CREATE TABLE turnstile (
     station_name    STRING,
     line            STRING
 ) WITH (
-    kafka_topic = 'org.chicago.cta.turnstiles.v1',
+    kafka_topic = 'com.chicago.cta.turnstiles.v1',
     value_format = 'avro',
     key = 'station_id'
 );
@@ -35,7 +35,7 @@ CREATE TABLE turnstile_summary
 
 def execute_statement():
     """Executes the KSQL statement against the KSQL API"""
-    if topic_check.topic_exists("TURNSTILE_SUMMARY") is True:
+    if topic_check.topic_exists("turnstile_summary") is True:
         return
 
     logging.debug("executing ksql statement...")
