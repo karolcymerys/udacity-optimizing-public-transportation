@@ -7,6 +7,9 @@ import faust
 
 logger = logging.getLogger(__name__)
 
+TOPIC_PARTITIONS = 2
+TOPIC_REPLICAS = 2
+
 
 @dataclass
 class Station(faust.Record):
@@ -38,6 +41,7 @@ class TransformedStation(faust.Record):
         elif station.green:
             line = 'green'
         else:
+            logger.error(f'Invalid line for event: {station}')
             return
 
         return TransformedStation(
@@ -49,14 +53,23 @@ class TransformedStation(faust.Record):
 
 
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
-topic = app.topic("com.chicago.cta.stations", value_type=Station, partitions=1)
+topic = app.topic(
+    'com.chicago.cta.stations',
+    value_type=Station,
+    partitions=TOPIC_PARTITIONS,
+    replicas=TOPIC_REPLICAS
+)
 
-out_topic = app.topic("com.chicago.cta.stations.table.v1", partitions=1)
+out_topic = app.topic(
+    'com.chicago.cta.stations.table.v1',
+    partitions=TOPIC_PARTITIONS,
+    replicas=TOPIC_REPLICAS
+)
 
 table = app.Table(
     name='com.chicago.cta.stations.table.v1',
     default=TransformedStation,
-    partitions=1,
+    partitions=TOPIC_PARTITIONS,
     changelog_topic=out_topic,
 )
 

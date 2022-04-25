@@ -10,8 +10,8 @@ from models.producer import Producer
 
 logger = logging.getLogger(__name__)
 
-TOPIC_PARTITIONS = 1
-TOPIC_REPLICAS = 1
+TOPIC_PARTITIONS = 2
+TOPIC_REPLICAS = 2
 
 
 class Station(Producer):
@@ -29,7 +29,7 @@ class Station(Producer):
             .replace("'", "")
 
         super().__init__(
-            topic_name=f'com.chicago.cta.station.arrivals.v1.{station_name}',
+            topic_name=f'com.chicago.cta.{station_name}.arrivals.v1',
             key_schema=Station.key_schema,
             value_schema=Station.value_schema,
             num_partitions=TOPIC_PARTITIONS,

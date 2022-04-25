@@ -10,8 +10,8 @@ from models.turnstile_hardware import TurnstileHardware
 
 logger = logging.getLogger(__name__)
 
-TOPIC_PARTITIONS = 1
-TOPIC_REPLICAS = 1
+TOPIC_PARTITIONS = 2
+TOPIC_REPLICAS = 2
 
 
 class Turnstile(Producer):

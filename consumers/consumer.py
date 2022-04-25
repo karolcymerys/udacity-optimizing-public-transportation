@@ -11,7 +11,7 @@ from tornado import gen
 
 logger = logging.getLogger(__name__)
 
-BROKER_URL = "PLAINTEXT://localhost:9092"
+BROKER_URL = "PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094"
 SCHEMA_REGISTRY_URL = "http://localhost:8081"
 
 
@@ -36,7 +36,8 @@ class KafkaConsumer:
 
         self.broker_properties = {
             'bootstrap.servers': BROKER_URL,
-            'group.id': str(uuid.uuid4())
+            'group.id': str(uuid.uuid4()),
+            'auto.offset.reset': 'earliest' if offset_earliest else 'latest'
         }
 
         if is_avro is True:
